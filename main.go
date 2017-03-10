@@ -7,12 +7,9 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"math/big"
-	"net"
 	"os"
-	"sync"
 	"time"
 )
 
@@ -86,19 +83,4 @@ func generateSelfSignedCertificate(host string) ([]byte, []byte, error) {
 	key := pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(rkey)})
 
 	return pub, key, nil
-}
-
-func stream(a, b net.Conn) {
-	var wg sync.WaitGroup
-	wg.Add(2)
-	go copyWait(a, b, &wg)
-	go copyWait(b, a, &wg)
-	wg.Wait()
-	a.Close()
-	b.Close()
-}
-
-func copyWait(w io.Writer, r io.Reader, wg *sync.WaitGroup) {
-	defer wg.Done()
-	io.Copy(w, r)
 }
